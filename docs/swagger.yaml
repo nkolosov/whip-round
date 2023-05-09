@@ -55,22 +55,6 @@ definitions:
 info:
   contact: {}
 paths:
-  /health-check:
-    get:
-      consumes:
-      - application/json
-      description: Check server health
-      operationId: health-check
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: Check server health
-      tags:
-      - health
   /users:
     get:
       consumes:

@@ -2,17 +2,16 @@ package repository
 
 import (
 	"context"
-	"github.com/nkolosov/whip-round/internal/db/memory"
 	"github.com/nkolosov/whip-round/internal/domain"
 	"sync"
 )
 
 type UserStore struct {
-	store memory.UserDB
+	store User
 	mu    sync.RWMutex
 }
 
-func NewUserRepository(store memory.UserDB) *UserStore {
+func NewUserRepository(store User) *UserStore {
 	return &UserStore{
 		store: store,
 		mu:    sync.RWMutex{},

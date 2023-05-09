@@ -6,7 +6,8 @@ import (
 
 type Config struct {
 	Server struct {
-		Port int `mapstructure:"port"`
+		Port            int `mapstructure:"port"`
+		HealthCheckPort int `mapstructure:"health_check_port"`
 	} `mapstructure:"server"`
 	TokenSymmetricKey string `mapstructure:"token_symmetric_key"`
 	HashSalt          string `mapstructure:"hash_salt"`

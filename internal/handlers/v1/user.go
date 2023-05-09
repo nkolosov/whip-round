@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/nkolosov/whip-round/internal/domain"
 	"github.com/nkolosov/whip-round/internal/utils/currency"
@@ -22,13 +23,13 @@ import (
 func (h *Handlers) CreateUser(c *gin.Context) {
 	var userDTO *domain.UserDTO
 	if err := c.ShouldBindJSON(&userDTO); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	createUser, err := h.service.UserService.CreateUser(c, userDTO)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("failed to create user: %s with error %s", userDTO, err.Error()))
 		return
 	}
 
@@ -65,7 +66,7 @@ func (h *Handlers) GetUserByFilters(c *gin.Context) {
 
 	customer, err := h.service.UserService.FindUserByEmail(c, email)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, http.StatusNotFound, fmt.Sprintf("failed to find user by email: %s", err.Error()))
 		return
 	}
 

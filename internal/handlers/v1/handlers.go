@@ -22,7 +22,5 @@ func (h *Handlers) Init(api *gin.RouterGroup) *gin.RouterGroup {
 		usersAPI.GET("", h.GetUserByFilters)
 	}
 
-	api.GET("/health-check", h.HealthCheck)
-
 	return api
 }

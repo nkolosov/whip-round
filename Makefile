@@ -1,7 +1,6 @@
 include .env
 export
-# go build
-# go mod init
+
 docker-build:
 	docker build -t $(APP_IMAGE_NAME) .
 
@@ -21,5 +20,15 @@ docker-restart:
 swag:
 	swag init -g cmd/main.go
 
-test:
+deps:
+	go mod download
+
+build: deps
+	go build -o $(APP_IMAGE_NAME) cmd/main.go
+
+run: build
+	./$(APP_IMAGE_NAME)
+
+test: deps
+	go generate ./...
 	go test -v ./...

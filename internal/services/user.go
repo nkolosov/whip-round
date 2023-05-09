@@ -38,7 +38,7 @@ func (s *UserService) CreateUser(ctx context.Context, userDTO *domain.UserDTO) (
 		return nil, fmt.Errorf(ErrUserAlreadyExists.Error(), userDTO.Email)
 	}
 
-	user, err := userDTO.ToDomain()
+	user, err := domain.ConvertUserDTOToUser(userDTO)
 	if err != nil {
 		return nil, err
 	}

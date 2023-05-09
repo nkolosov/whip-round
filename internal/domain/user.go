@@ -2,9 +2,8 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
-	"github.com/nkolosov/whip-round/internal/utils/conv"
-	"github.com/nkolosov/whip-round/internal/utils/currency"
 	"time"
 )
 
@@ -22,6 +21,17 @@ type User struct {
 	CreatedAt time.Time `json:"created_at" example:"2020-01-01T00:00:00Z" swaggertype:"string"`
 }
 
+func (u *User) String() string {
+	if u == nil {
+		return "User(nil)"
+	}
+
+	return fmt.Sprintf(
+		"User{ID: %s, Login: %s, Email: %s, Birthdate: %s, Phone: %s, Balance: %d, CreatedAt: %s}",
+		u.ID, u.Login, u.Email, u.Birthdate, u.Phone, u.Balance, u.CreatedAt,
+	)
+}
+
 type UserDTO struct {
 	Login     string      `json:"login" example:"john.doe" swaggertype:"string"`
 	Email     string      `json:"email" example:"jogn.doe@mail.com" swaggertype:"string"`
@@ -30,43 +40,19 @@ type UserDTO struct {
 	Balance   interface{} `json:"balance" example:"100.00" swaggertype:"number,string"` // in dollars
 }
 
-func (cdto *UserDTO) FromDomain(c *User) {
-	if c == nil {
-		return
+func (uDTO *UserDTO) String() string {
+	if uDTO == nil {
+		return "UserDTO(nil)"
 	}
 
-	cdto.Login = c.Login
-	cdto.Email = c.Email
-	cdto.Birthdate = c.Birthdate
-	cdto.Phone = c.Phone
-	cdto.Balance = c.Balance
+	return fmt.Sprintf(
+		"UserDTO{Login: %s, Email: %s, Birthdate: %s, Phone: %s, Balance: %s}",
+		uDTO.Login, uDTO.Email, uDTO.Birthdate, uDTO.Phone, uDTO.Balance,
+	)
 }
 
-func (cdto *UserDTO) ToDomain() (*User, error) {
-	if cdto == nil {
-		return nil, ErrEmptyUserDTO
-	}
-
-	// convert interface{} to float64
-	toFloat64, err := conv.ConvertInterfaceToFloat64(cdto.Balance)
-	if err != nil {
-		return nil, err
-	}
-
-	// convert dollars to cents
-	cents := currency.ConvertDollarsToCents(toFloat64)
-
-	return &User{
-		Login:     cdto.Login,
-		Email:     cdto.Email,
-		Birthdate: cdto.Birthdate,
-		Phone:     cdto.Phone,
-		Balance:   cents,
-	}, nil
-}
-
-func (cdto *UserDTO) Validate() error {
-	if cdto == nil {
+func (uDTO *UserDTO) Validate() error {
+	if uDTO == nil {
 		return ErrEmptyUserDTO
 	}
 

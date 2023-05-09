@@ -6,6 +6,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/nkolosov/whip-round/internal/app"
 	"github.com/nkolosov/whip-round/internal/config"
+	"github.com/nkolosov/whip-round/internal/health"
 	"log"
 	"os"
 	"os/signal"
@@ -27,6 +28,9 @@ func main() {
 	go func() {
 		log.Fatal(srv.Run())
 	}()
+
+	go health.StartHealthCheckServer(cfg.Server.HealthCheckPort)
+
 	log.Println("Starting server on port ", cfg.Server.Port)
 
 	quit := make(chan os.Signal, 1)
@@ -52,6 +56,12 @@ func initConfig() (*config.Config, error) {
 		return nil, fmt.Errorf("error while reading port from env: %w", err)
 	}
 	cfg.Server.Port = port
+
+	healthCheckPort, err := strconv.Atoi(os.Getenv("HEALTH_CHECK_PORT"))
+	if err != nil {
+		return nil, fmt.Errorf("error while reading health check port from env: %w", err)
+	}
+	cfg.Server.HealthCheckPort = healthCheckPort
 
 	cfg.TokenSymmetricKey = os.Getenv("TOKEN_SYMMETRIC_KEY")
 	cfg.HashSalt = os.Getenv("HASH_SALT")
