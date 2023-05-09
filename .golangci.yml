@@ -1,0 +1,10 @@
+linters-settings:
+  unused:
+    check-exported: true
+  errcheck:
+    enabled: true
+  deadcode:
+    enabled: true
+  gocyclo:
+    enabled: true
+    min-complexity: 10
