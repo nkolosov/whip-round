@@ -1,0 +1,118 @@
+definitions:
+  v1.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  v1.UserRequest:
+    properties:
+      balance:
+        example: 100
+        type: number
+      birthdate:
+        example: "1990-01-01"
+        format: date
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      login:
+        example: john.doe
+        type: string
+      phone:
+        example: "+79999999999"
+        type: string
+    type: object
+  v1.UserResponse:
+    properties:
+      birthdate:
+        example: "1990-01-01"
+        format: date
+        type: string
+      created_at:
+        example: "2020-01-01T00:00:00Z"
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: 1
+        format: int64
+        type: integer
+      login:
+        example: john.doe
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: password
+        type: string
+      phone:
+        example: "+79999999999"
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get a user by filters
+      operationId: get-user
+      parameters:
+      - description: Email
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Get a user by filters
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      operationId: create-user
+      parameters:
+      - description: UserRequest
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/v1.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+swagger: "2.0"
