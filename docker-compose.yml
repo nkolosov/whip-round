@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: "whip-round-postgres"
+    hostname: postgres
+    restart: unless-stopped
+    ports:
+      - ${DB_PORT}:5432
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - app-network
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: "whip-round-app"
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    env_file:
+      - .env
+#      - .env.dev
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    volumes:
+      - database_postgres:/var/lib/postgresql/data
+
+volumes:
+  database_postgres:
+
+networks:
+  app-network:
+    driver: bridge
