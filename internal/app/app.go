@@ -29,7 +29,7 @@ func App(cfg *config.Config) (*server.Server, error) {
 		log.Fatal(err)
 	}
 
-	store, err := postgres.NewPostgresConnection(db.ConfigDB{
+	store, err := postgres.NewPostgresConnection(db.Config{
 		Host:     cfg.DB.Host,
 		Port:     cfg.DB.Port,
 		User:     cfg.DB.User,
