@@ -5,7 +5,11 @@ import (
 	"github.com/nkolosov/whip-round/internal/db"
 )
 
-func NewPostgresConnection(cfg db.Config) (*sql.DB, error) {
+func NewPostgresConnection(cfg *db.Config) (*sql.DB, error) {
+	if cfg == nil {
+		return nil, db.ErrConfigIsNil
+	}
+
 	store, err := sql.Open("postgres", cfg.String())
 	if err != nil {
 		return nil, err

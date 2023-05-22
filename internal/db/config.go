@@ -1,6 +1,13 @@
 package db
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	ErrConfigIsNil = errors.New("config is nil")
+)
 
 type Config struct {
 	Host     string
