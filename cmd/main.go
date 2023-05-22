@@ -76,7 +76,15 @@ func initConfig() (*config.Config, error) {
 	cfg.DB.DBName = os.Getenv("DB_NAME")
 	cfg.DB.Password = os.Getenv("DB_PASSWORD")
 	cfg.DB.SSLMode = os.Getenv("DB_SSL_MODE")
-	cfg.DB.MaxConn = os.Getenv("DB_MAX_OPEN_CONN")
+
+	cfg.DB.MaxIdleConns, err = strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNS"))
+	if err != nil {
+		return nil, err
+	}
+	cfg.DB.MaxOpenConns, err = strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS"))
+	if err != nil {
+		return nil, err
+	}
 
 	fmt.Printf("%+v\n", cfg)
 

@@ -20,8 +20,8 @@ func NewPostgresConnection(cfg *db.Config) (*sql.DB, error) {
 		return nil, err
 	}
 
-	store.SetMaxIdleConns(300)
-	store.SetMaxOpenConns(60)
+	store.SetMaxIdleConns(cfg.MaxIdleConns)
+	store.SetMaxOpenConns(cfg.MaxOpenConns)
 
 	return store, nil
 }
