@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
 	"github.com/nkolosov/whip-round/internal/app"
 	"github.com/nkolosov/whip-round/internal/config"
 	"github.com/nkolosov/whip-round/internal/health"
@@ -48,12 +47,12 @@ func main() {
 }
 
 func loadEnv() error {
-	err := godotenv.Load(".env")
-	if err != nil {
-		return fmt.Errorf("error while loading .env file: %w", err)
-	}
-
 	viper.AutomaticEnv()
+	viper.SetConfigFile(".env")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error while reading config file %s", err)
+	}
 
 	return nil
 }
