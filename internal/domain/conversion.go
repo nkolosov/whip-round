@@ -3,6 +3,7 @@ package domain
 import (
 	"github.com/nkolosov/whip-round/internal/utils/conv"
 	"github.com/nkolosov/whip-round/internal/utils/currency"
+	"github.com/shopspring/decimal"
 )
 
 // ConvertUserDTOToUser converts UserDTO to User domain object.
@@ -18,7 +19,8 @@ func ConvertUserDTOToUser(uDTO *UserDTO) (*User, error) {
 	}
 
 	// convert dollars to cents
-	cents := currency.ConvertDollarsToCents(toFloat64)
+	dollars := decimal.NewFromFloat(toFloat64)
+	cents := currency.ConvertDollarsToCents(dollars)
 
 	return &User{
 		Login:     uDTO.Login,
