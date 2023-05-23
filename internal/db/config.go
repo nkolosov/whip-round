@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"net/url"
 )
 
 var (
@@ -21,6 +22,6 @@ type Config struct {
 }
 
 func (cfg *Config) String() string {
-	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=%s password=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.DBName, cfg.SSLMode, cfg.Password)
+	return fmt.Sprintf("%s://%s:%s@%s:%d/%s?sslmode=%s",
+		"postgres", url.QueryEscape(cfg.User), url.QueryEscape(cfg.Password), cfg.Host, cfg.Port, cfg.DBName, cfg.SSLMode)
 }
