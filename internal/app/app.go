@@ -30,14 +30,15 @@ func App(cfg *config.Config) (*server.Server, error) {
 	}
 
 	store, err := postgres.NewPostgresConnection(&db.Config{
-		Host:         cfg.DB.Host,
-		Port:         cfg.DB.Port,
-		User:         cfg.DB.User,
-		DBName:       cfg.DB.DBName,
-		Password:     cfg.DB.Password,
-		SSLMode:      cfg.DB.SSLMode,
-		MaxIdleConns: cfg.DB.MaxIdleConns,
-		MaxOpenConns: cfg.DB.MaxOpenConns,
+		Host:           cfg.DB.Host,
+		Port:           cfg.DB.Port,
+		User:           cfg.DB.User,
+		DBName:         cfg.DB.DBName,
+		Password:       cfg.DB.Password,
+		SSLMode:        cfg.DB.SSLMode,
+		MaxIdleConns:   cfg.DB.MaxIdleConns,
+		MaxOpenConns:   cfg.DB.MaxOpenConns,
+		ConnectTimeout: cfg.DB.ConnectTimeout,
 	})
 	if err != nil {
 		log.Fatal("Error connecting to database: ", err)
