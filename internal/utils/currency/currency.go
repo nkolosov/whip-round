@@ -1,13 +1,19 @@
 package currency
 
-import "math"
+import (
+	"github.com/shopspring/decimal"
+)
 
 // ConvertCentsToDollars converts balance from cents to dollars
-func ConvertCentsToDollars(cents int64) float64 {
-	return float64(cents) / 100
+func ConvertCentsToDollars(cents int64) decimal.Decimal {
+	centsDecimal := decimal.NewFromInt(cents)
+	dollars := centsDecimal.Div(decimal.NewFromInt(100))
+	return dollars
 }
 
 // ConvertDollarsToCents converts balance from dollars to cents
-func ConvertDollarsToCents(dollars float64) int64 {
-	return int64(math.Round(dollars * 100))
+func ConvertDollarsToCents(dollars decimal.Decimal) int64 {
+	centsDecimal := dollars.Mul(decimal.NewFromInt(100))
+	cents := centsDecimal.IntPart()
+	return cents
 }
