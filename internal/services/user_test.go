@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/nkolosov/whip-round/internal/repository"
 
@@ -12,8 +15,6 @@ import (
 	mockshash "github.com/nkolosov/whip-round/internal/hash/mocks"
 	mocksrepo "github.com/nkolosov/whip-round/internal/repository/mocks"
 	mockstoken "github.com/nkolosov/whip-round/internal/token/mocks"
-	"reflect"
-	"testing"
 )
 
 func TestUserService_FindUserByEmailPassword(t *testing.T) {

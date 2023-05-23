@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
+
 	"github.com/nkolosov/whip-round/internal/hash"
 	"github.com/nkolosov/whip-round/internal/repository"
 	"github.com/nkolosov/whip-round/internal/token"
-	"time"
 )
 
 type AuthService struct {

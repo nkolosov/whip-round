@@ -1,8 +1,9 @@
 package hash
 
 import (
-	"github.com/nkolosov/whip-round/internal/utils/random"
 	"testing"
+
+	"github.com/nkolosov/whip-round/internal/utils/random"
 )
 
 var (

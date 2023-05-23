@@ -1,10 +1,11 @@
 package token
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
-	"time"
 )
 
 // PasetoManager is a paseto maker.

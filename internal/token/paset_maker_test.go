@@ -1,10 +1,11 @@
 package token
 
 import (
-	"github.com/google/uuid"
-	"github.com/nkolosov/whip-round/internal/utils/random"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/nkolosov/whip-round/internal/utils/random"
 )
 
 func TestPasetoMaker(t *testing.T) {

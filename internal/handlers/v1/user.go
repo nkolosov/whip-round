@@ -2,10 +2,11 @@ package v1
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nkolosov/whip-round/internal/domain"
 	"github.com/nkolosov/whip-round/internal/utils/currency"
-	"net/http"
 )
 
 // CreateUser creates a new user.

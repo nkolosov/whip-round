@@ -3,14 +3,15 @@ package services
 import (
 	"context"
 	"errors"
+	"reflect"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/nkolosov/whip-round/internal/domain"
 	mockshash "github.com/nkolosov/whip-round/internal/hash/mocks"
 	mocksrepo "github.com/nkolosov/whip-round/internal/repository/mocks"
 	mockstoken "github.com/nkolosov/whip-round/internal/token/mocks"
-	"reflect"
-	"testing"
-	"time"
 )
 
 func TestUserService_GetAccessToken(t *testing.T) {

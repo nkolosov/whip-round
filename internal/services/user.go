@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/nkolosov/whip-round/internal/domain"
 	"github.com/nkolosov/whip-round/internal/hash"
