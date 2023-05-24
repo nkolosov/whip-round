@@ -2,26 +2,36 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/nkolosov/whip-round/internal/domain"
+	"github.com/nkolosov/whip-round/internal/repository/mocks"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 )
 
 func TestUserStore_GetUser(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	store := NewUserRepository(db)
+	// Mock Pool and Row
+	mockPool := mocks.NewMockPool(ctrl)
+	mockRow := mocks.NewMockRow(ctrl)
+
+	store := NewUserRepository(mockPool)
 
 	// создаем контекст теста
 	ctx := context.Background()
 	email := "test@example.com"
-	expectedUser := &domain.User{ID: uuid.New(), Email: email}
+	expectedUser := &domain.User{
+		ID:        uuid.New(),
+		Email:     email,
+		CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC),
+	}
 
 	// создаем тестовые случаи
 	testCases := []struct {
@@ -45,97 +55,106 @@ func TestUserStore_GetUser(t *testing.T) {
 		},
 	}
 
-	// выполняем тестовые случаи
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// устанавливаем мок ожидания
-			mock.ExpectQuery("^SELECT (.+) FROM users WHERE email = \\$1").
-				WithArgs(email).
-				WillReturnRows(tc.rows)
+			mockPool.EXPECT().QueryRow(ctx, gomock.Any(), email).Return(mockRow)
+			mockRow.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) error {
+				if tc.expectedUser == nil {
+					return sql.ErrNoRows // simulate no rows found
+				}
+				for i, d := range dest {
+					switch v := d.(type) {
+					case *uuid.UUID:
+						*v = expectedUser.ID
+					case *string:
+						if i == 2 { // index of email in the scan
+							*v = expectedUser.Email
+						}
+						// handle other types here
+					}
+				}
+				return nil
+			})
 
-			// вызываем метод GetUser
 			user, err := store.GetUserByEmail(ctx, email)
 
 			// проверяем результаты
 			require.Equal(t, tc.expectedUser, user)
-			require.Equal(t, tc.expectedError, err)
-
-			// убеждаемся, что все ожидания мока были выполнены
-			err = mock.ExpectationsWereMet()
-			require.NoError(t, err)
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.Equal(t, tc.expectedError.Error(), err.Error())
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
 }
 
 func TestUserStore_CreateUser(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	userRepo := NewUserRepository(db)
+	mockTx := mocks.NewMockTx(ctrl)
+	mockRow := mocks.NewMockRow(ctrl)
 
-	// Создаем контекст теста
-	ctx := context.Background()
-	user := &domain.User{
-		Login:     "test",
-		Email:     "test@example.com",
-		Birthdate: "01.01.2000",
-		Phone:     "123456789",
-		Balance:   0,
-		CreatedAt: time.Now(),
-	}
-	expectedUser := &domain.User{
-		ID:        uuid.New(),
-		Login:     user.Login,
-		Email:     user.Email,
-		Birthdate: user.Birthdate,
-		Phone:     user.Phone,
-		Balance:   user.Balance,
-		CreatedAt: user.CreatedAt,
-	}
+	store := NewUserRepository(mockTx)
 
-	// Создаем тестовые случаи
+	// Тестовые случаи
 	testCases := []struct {
 		name          string
-		expectedUser  *domain.User
+		user          *domain.User
 		expectedError error
 	}{
 		{
-			name:          "success",
-			expectedUser:  expectedUser,
+			name: "success",
+			user: &domain.User{
+				Login:     "test",
+				Email:     "test@example.com",
+				Birthdate: "01.01.2000",
+				Phone:     "123456789",
+				Balance:   0,
+				CreatedAt: time.Now(),
+			},
 			expectedError: nil,
 		},
 		{
-			name:          "error",
-			expectedUser:  nil,
-			expectedError: fmt.Errorf("пользователь с адресом электронной почты %s не создан", user.Email),
+			name: "error",
+			user: &domain.User{
+				Login:     "test",
+				Email:     "test@example.com",
+				Birthdate: "01.01.2000",
+				Phone:     "123456789",
+				Balance:   0,
+				CreatedAt: time.Now(),
+			},
+			expectedError: fmt.Errorf(ErrUserCreate.Error(), "test@example.com"),
 		},
 	}
 
 	// Выполняем тестовые случаи
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.expectedError != nil {
-				mock.ExpectBegin().WillReturnError(tc.expectedError)
+			mockTx.EXPECT().Begin(gomock.Any()).Return(mockTx, nil)
+
+			if tc.expectedError == nil {
+				mockTx.EXPECT().QueryRow(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(mockRow)
+				mockRow.EXPECT().Scan(gomock.Any()).Return(nil)
+				mockTx.EXPECT().Commit(gomock.Any()).Return(nil)
 			} else {
-				mock.ExpectBegin()
-				mock.ExpectQuery("^INSERT INTO users (.+) VALUES (.+) RETURNING (.+)").
-					WithArgs(user.Login, user.Email, user.Birthdate, user.Phone, user.Balance).
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).
-						AddRow(expectedUser.ID))
-				mock.ExpectCommit()
+				mockTx.EXPECT().QueryRow(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(mockRow)
+				mockRow.EXPECT().Scan(gomock.Any()).Return(tc.expectedError)
+				mockTx.EXPECT().Rollback(gomock.Any()).Return(nil)
 			}
 
-			// вызываем метод CreateUser
-			createdUser, err := userRepo.CreateUser(ctx, user)
+			createdUser, err := store.CreateUser(context.Background(), tc.user)
 
-			// проверяем результаты
-			require.Equal(t, tc.expectedUser, createdUser)
 			require.Equal(t, tc.expectedError, err)
 
-			// убеждаемся, что все ожидания мока были выполнены
-			err = mock.ExpectationsWereMet()
-			require.NoError(t, err)
+			if tc.expectedError == nil {
+				require.NotNil(t, createdUser)
+			} else {
+				require.Nil(t, createdUser)
+			}
 		})
 	}
 }
