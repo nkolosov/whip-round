@@ -14,7 +14,7 @@ var (
 	ErrCreatePool  = errors.New("failed to create connection pool: %v")
 )
 
-func NewPostgresConnection(ctx context.Context, cfg *db.Config) (*pgxpool.Pool, error) {
+func NewPool(ctx context.Context, cfg *db.Config) (*pgxpool.Pool, error) {
 	if cfg == nil {
 		return nil, db.ErrConfigIsNil
 	}

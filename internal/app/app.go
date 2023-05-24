@@ -33,7 +33,7 @@ func App(cfg *config.Config) (*server.Server, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	store, err := postgres.NewPostgresConnection(ctx, &db.Config{
+	store, err := postgres.NewPool(ctx, &db.Config{
 		Host:           cfg.DB.Host,
 		Port:           cfg.DB.Port,
 		User:           cfg.DB.User,
