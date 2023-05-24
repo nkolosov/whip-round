@@ -1,28 +1,35 @@
 package postgres
 
 import (
-	"database/sql"
-
+	"context"
+	"errors"
+	"fmt"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/nkolosov/whip-round/internal/db"
 )
 
-func NewPostgresConnection(cfg *db.Config) (*sql.DB, error) {
+var (
+	ErrParseConfig = errors.New("failed to parse config: %v")
+	ErrCreatePool  = errors.New("failed to create connection pool: %v")
+)
+
+func NewPostgresConnection(cfg *db.Config) (*pgxpool.Pool, error) {
 	if cfg == nil {
 		return nil, db.ErrConfigIsNil
 	}
 
-	store, err := sql.Open("postgres", cfg.String())
+	poolConfig, err := pgxpool.ParseConfig(cfg.String())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", ErrParseConfig, err)
 	}
 
-	err = store.Ping()
+	poolConfig.MaxConns = int32(cfg.MaxOpenConns)
+	poolConfig.MinConns = int32(cfg.MaxIdleConns)
+
+	pool, err := pgxpool.ConnectConfig(context.Background(), poolConfig)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", ErrCreatePool, err)
 	}
 
-	store.SetMaxIdleConns(cfg.MaxIdleConns)
-	store.SetMaxOpenConns(cfg.MaxOpenConns)
-
-	return store, nil
+	return pool, nil
 }
