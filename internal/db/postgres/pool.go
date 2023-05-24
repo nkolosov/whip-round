@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/nkolosov/whip-round/internal/db"
+	"sync"
 )
 
 var (
@@ -31,5 +32,37 @@ func NewPostgresConnection(ctx context.Context, cfg *db.Config) (*pgxpool.Pool, 
 		return nil, fmt.Errorf("%w: %v", ErrCreatePool, err)
 	}
 
+	err = checkConnections(ctx, pool, int(poolConfig.MaxConns))
+	if err != nil {
+		return nil, err
+	}
+
 	return pool, nil
+}
+
+func checkConnections(ctx context.Context, pool *pgxpool.Pool, numConns int) error {
+	var wg sync.WaitGroup
+	errChan := make(chan error, numConns)
+
+	for i := 0; i < numConns; i++ {
+		wg.Add(1)
+		go func(errChan chan<- error, count int) {
+			defer wg.Done()
+
+			_, err := pool.Exec(ctx, "SELECT 1")
+			if err != nil {
+				errChan <- err
+			}
+		}(errChan, i)
+	}
+
+	wg.Wait()
+
+	select {
+	case err := <-errChan:
+		return err
+	default:
+		close(errChan)
+		return nil
+	}
 }

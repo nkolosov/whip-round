@@ -47,6 +47,7 @@ func App(cfg *config.Config) (*server.Server, error) {
 	if err != nil {
 		log.Fatal("Error connecting to database: ", err)
 	}
+	defer store.Close()
 
 	repo, err := repository.NewRepository(store)
 	if err != nil {
