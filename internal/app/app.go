@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,7 +30,10 @@ func App(cfg *config.Config) (*server.Server, error) {
 		log.Fatal(err)
 	}
 
-	store, err := postgres.NewPostgresConnection(&db.Config{
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	store, err := postgres.NewPostgresConnection(ctx, &db.Config{
 		Host:           cfg.DB.Host,
 		Port:           cfg.DB.Port,
 		User:           cfg.DB.User,

@@ -13,7 +13,7 @@ var (
 	ErrCreatePool  = errors.New("failed to create connection pool: %v")
 )
 
-func NewPostgresConnection(cfg *db.Config) (*pgxpool.Pool, error) {
+func NewPostgresConnection(ctx context.Context, cfg *db.Config) (*pgxpool.Pool, error) {
 	if cfg == nil {
 		return nil, db.ErrConfigIsNil
 	}
@@ -26,7 +26,7 @@ func NewPostgresConnection(cfg *db.Config) (*pgxpool.Pool, error) {
 	poolConfig.MaxConns = int32(cfg.MaxOpenConns)
 	poolConfig.MinConns = int32(cfg.MaxIdleConns)
 
-	pool, err := pgxpool.ConnectConfig(context.Background(), poolConfig)
+	pool, err := pgxpool.ConnectConfig(ctx, poolConfig)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrCreatePool, err)
 	}
