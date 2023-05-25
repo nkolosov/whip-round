@@ -2,12 +2,11 @@ package services
 
 import (
 	"errors"
+
 	"github.com/nkolosov/whip-round/internal/hash"
 	"github.com/nkolosov/whip-round/internal/repository"
 	"github.com/nkolosov/whip-round/internal/token"
 )
-
-////go:generate mockgen -destination=mocks/mocks.go -package=mocks github.com/nkolosov/whip-round/internal/services ServiceI,UserServiceI,SessionServiceI
 
 type Service struct {
 	AuthService *AuthService

@@ -3,14 +3,16 @@ package services
 import (
 	"context"
 	"errors"
+	"github.com/google/uuid"
+	"reflect"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/nkolosov/whip-round/internal/domain"
 	mockshash "github.com/nkolosov/whip-round/internal/hash/mocks"
 	mocksrepo "github.com/nkolosov/whip-round/internal/repository/mocks"
 	mockstoken "github.com/nkolosov/whip-round/internal/token/mocks"
-	"reflect"
-	"testing"
-	"time"
 )
 
 func TestUserService_GetAccessToken(t *testing.T) {
@@ -29,16 +31,17 @@ func TestUserService_GetAccessToken(t *testing.T) {
 	//hashedPassword := "hashed_password"
 
 	user := &domain.User{
+		ID:    uuid.New(),
 		Email: email,
 	}
 	userRepo.EXPECT().GetUserByEmail(ctx, email).Return(user, nil)
 
-	accessToken := "access_token"
-	tokenManager.EXPECT().CreateToken(user.ID, time.Hour*24).Return(accessToken, nil)
+	expectedAccessToken := "access_token"
+	expectedRefreshToken := "refresh_token"
+	tokenManager.EXPECT().CreateToken(user.ID, time.Hour*24).Return(expectedAccessToken, nil)
+	tokenManager.EXPECT().CreateToken(user.ID, time.Hour*24*7).Return(expectedRefreshToken, nil)
 
 	t.Run("Valid sign in", func(t *testing.T) {
-		expectedAccessToken := accessToken
-		expectedRefreshToken := ""
 
 		//hashManager.EXPECT().CheckPasswordHash(password, hashedPassword).Return(true)
 

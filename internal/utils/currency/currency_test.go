@@ -1,26 +1,28 @@
 package currency
 
 import (
-	"math"
+	"github.com/shopspring/decimal"
 	"testing"
 )
 
 func TestConvertCentsToDollars(t *testing.T) {
-	cents := int64(10000)
-	expectedDollars := float64(cents) / 100
-	dollars := ConvertCentsToDollars(cents)
+	cents := int64(1000)
+	expectedDollars := decimal.NewFromFloat(10.00)
 
-	if dollars != expectedDollars {
-		t.Errorf("ConvertCentsToDollars(%v) returned %v, expected %v", cents, dollars, expectedDollars)
+	actualDollars := ConvertCentsToDollars(cents)
+
+	if !expectedDollars.Equal(actualDollars) {
+		t.Errorf("Unexpected result. Expected: %s, got: %s", expectedDollars.String(), actualDollars.String())
 	}
 }
 
 func TestConvertDollarsToCents(t *testing.T) {
-	dollars := 100.50
-	expectedCents := int64(math.Round(dollars * 100))
-	cents := ConvertDollarsToCents(dollars)
+	dollars := decimal.NewFromFloat(10.00)
+	expectedCents := int64(1000)
 
-	if cents != expectedCents {
-		t.Errorf("ConvertDollarsToCents(%v) returned %v, expected %v", dollars, cents, expectedCents)
+	actualCents := ConvertDollarsToCents(dollars)
+
+	if expectedCents != actualCents {
+		t.Errorf("Unexpected result. Expected: %d, got: %d", expectedCents, actualCents)
 	}
 }

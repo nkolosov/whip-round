@@ -3,6 +3,7 @@ package hash
 import (
 	"encoding/base64"
 	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 

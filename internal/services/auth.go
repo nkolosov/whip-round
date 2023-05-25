@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
+
 	"github.com/nkolosov/whip-round/internal/hash"
 	"github.com/nkolosov/whip-round/internal/repository"
 	"github.com/nkolosov/whip-round/internal/token"
-	"time"
 )
 
 type AuthService struct {
@@ -22,8 +23,10 @@ func NewAuthService(repo repository.User, tokenManager token.Manager, hashManage
 	}
 }
 
-func (s *AuthService) GetAccessToken(ctx context.Context, email string, password string) (string, string, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email) // Используйте GetUserByEmail здесь
+// GetAccessToken returns access token and refresh token for specific email and password.
+// It returns error if any.
+func (s *AuthService) GetAccessToken(ctx context.Context, email string, password string) (accessToken string, refreshToken string, err error) {
+	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", "", err
 	}
@@ -33,10 +36,15 @@ func (s *AuthService) GetAccessToken(ctx context.Context, email string, password
 	//	return "", "", fmt.Errorf("invalid password")
 	//}
 
-	accessToken, err := s.tokenManager.CreateToken(user.ID, time.Hour*24)
+	accessToken, err = s.tokenManager.CreateToken(user.ID, time.Hour*24)
 	if err != nil {
 		return "", "", err
 	}
 
-	return accessToken, "", nil
+	refreshToken, err = s.tokenManager.CreateToken(user.ID, time.Hour*24*7)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }

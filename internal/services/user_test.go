@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/golang/mock/gomock"
-	"github.com/nkolosov/whip-round/internal/db/memory"
+	"github.com/nkolosov/whip-round/internal/repository"
+
+	//"github.com/nkolosov/whip-round/internal/db/memory"
 	"github.com/nkolosov/whip-round/internal/domain"
 	mockshash "github.com/nkolosov/whip-round/internal/hash/mocks"
 	mocksrepo "github.com/nkolosov/whip-round/internal/repository/mocks"
 	mockstoken "github.com/nkolosov/whip-round/internal/token/mocks"
-	"reflect"
-	"testing"
 )
 
 func TestUserService_FindUserByEmailPassword(t *testing.T) {
@@ -42,9 +45,9 @@ func TestUserService_FindUserByEmailPassword(t *testing.T) {
 			email:          "non_existing@example.com",
 			password:       "non_existing_password",
 			mockResultUser: nil,
-			mockResultErr:  memory.ErrUserNotFound,
+			mockResultErr:  fmt.Errorf(repository.ErrUserNotFound.Error(), "non_existing@example.com"),
 			expectedResult: nil,
-			expectedError:  memory.ErrUserNotFound,
+			expectedError:  fmt.Errorf(repository.ErrUserNotFound.Error(), "non_existing@example.com"),
 		},
 	}
 
@@ -63,8 +66,8 @@ func TestUserService_FindUserByEmailPassword(t *testing.T) {
 			userRepo.EXPECT().GetUserByEmail(ctx, tc.email).Return(tc.mockResultUser, tc.mockResultErr)
 
 			user, err := userService.FindUserByEmail(ctx, tc.email)
-			if !errors.Is(err, tc.expectedError) {
-				t.Errorf("Expected error %v, got %v", tc.expectedError, err)
+			if !reflect.DeepEqual(err, tc.expectedError) {
+				t.Errorf("Expected %v, got %v", tc.expectedError, err)
 			}
 
 			if !reflect.DeepEqual(user, tc.expectedResult) {
@@ -127,7 +130,7 @@ func TestUserService_CreateUser(t *testing.T) {
 
 		//hashedPassword := "hashedPassword"
 		//hashManager.EXPECT().HashPassword(user.Password).Return(hashedPassword, nil)
-		userRepo.EXPECT().GetUserByEmail(ctx, user.Email).Return(nil, memory.ErrUserNotFound)
+		userRepo.EXPECT().GetUserByEmail(ctx, user.Email).Return(nil, errors.New("user not found"))
 		userRepo.EXPECT().CreateUser(ctx, gomock.Any()).Return(expectedUser, nil)
 
 		user, err := userService.CreateUser(ctx, &domain.UserDTO{

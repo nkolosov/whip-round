@@ -1,9 +1,10 @@
 package v1
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"time"
 )
 
 // ErrorResponse is the error response

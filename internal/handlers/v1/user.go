@@ -2,10 +2,12 @@ package v1
 
 import (
 	"fmt"
+	"github.com/shopspring/decimal"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nkolosov/whip-round/internal/domain"
 	"github.com/nkolosov/whip-round/internal/utils/currency"
-	"net/http"
 )
 
 // CreateUser creates a new user.
@@ -33,7 +35,8 @@ func (h *Handlers) CreateUser(c *gin.Context) {
 		return
 	}
 
-	createUser.Balance = currency.ConvertDollarsToCents(float64(createUser.Balance))
+	dollars := decimal.NewFromFloat(float64(createUser.Balance))
+	createUser.Balance = currency.ConvertDollarsToCents(dollars)
 
 	c.JSON(http.StatusOK, UserResponse{
 		ID:        createUser.ID,
